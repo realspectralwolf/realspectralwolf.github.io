@@ -1,0 +1,1 @@
+import"../chunks/CWj6FrbW.js";import"../chunks/CWnrPbiK.js";import{y as t,z as a}from"../chunks/CR5xA_7w.js";var p=t('<article class="prose mx-auto mt-12 px-4"><h3>- T. Sandsworth</h3></article>');function s(o){var r=p();a(o,r)}export{s as component};
