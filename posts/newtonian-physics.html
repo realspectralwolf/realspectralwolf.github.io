@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" class="dark">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="../favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<link href="../_app/immutable/assets/0.3BDUNfMB.css" rel="stylesheet">
+		<link rel="modulepreload" href="../_app/immutable/entry/start.DpZYY4rl.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CvULR9OM.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CJBXO5BX.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/Bg51STgC.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CBzpAnEx.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/BrE7qZ_c.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CYgJF_JY.js">
+		<link rel="modulepreload" href="../_app/immutable/entry/app.B-Ie2uOe.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/uqbROS4_.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CWj6FrbW.js">
+		<link rel="modulepreload" href="../_app/immutable/nodes/0.BCWFxKc7.js">
+		<link rel="modulepreload" href="../_app/immutable/nodes/4.BvwwEhh4.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/DG-Abp-w.js">
+	</head>
+	<body data-sveltekit-preload-data="hover" class="bg-light">
+		<div style="display: contents"><!--[--><!--[--><!----><article class="prose mx-auto mt-12 px-4"><nav><a href="/">home</a> <a href="/about">about</a></nav></article> <!----><article class="prose mx-auto mt-4 px-4"><!----><h1>Newtonian Physics</h1> <p>Simple ball physics/collisions straight from head implemented in c++.</p> <video width="480" autoplay loop muted><source src="/newtonian-collisions.mp4" type="video/mp4"/></video> <p>First we define a simple struct to hold ball object information:</p> <pre class="language-cpp"><!----><code class="language-cpp"><span class="token comment">// Ball</span>
+<span class="token keyword">struct</span> <span class="token class-name">ball_info</span><span class="token punctuation">&#123;</span>
+vec3 position<span class="token punctuation">;</span>
+vec3 velocity<span class="token punctuation">;</span>
+<span class="token keyword">float</span> radius<span class="token punctuation">;</span>
+<span class="token keyword">float</span> mass<span class="token punctuation">;</span>
+
+vec3 <span class="token function">get_momentum</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> velocity <span class="token operator">*</span> mass<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code><!----></pre> <p>Populate the balls array as you wish:</p> <pre class="language-cpp"><!----><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>ball_info<span class="token operator">></span> balls<span class="token punctuation">;</span></code><!----></pre> <p>Now after randomly creating some balls during initialization we move to the simulation update.
+Our update function should give as delta time (time between updates).</p> <p>First create copy of balls array so that we can always read the state before this update. Why? During collision one ball excerts force on the other and vice versa. But we iterate through each combination of balls. So if we were to change state during collision of ball_0 and ball_1 we would then get different reuslt at ball_1 and ball_0.</p> <pre class="language-cpp"><!----><code class="language-cpp"><span class="token keyword">auto</span> updated_balls <span class="token operator">=</span> balls<span class="token punctuation">;</span></code><!----></pre> <p>Define loss of energy during each collision (so that collisions are non perfect and eventuall end bouncing):</p> <pre class="language-cpp"><!----><code class="language-cpp"><span class="token keyword">float</span> loss_factor <span class="token operator">=</span> <span class="token number">1.0</span> <span class="token operator">-</span> collision_loss<span class="token punctuation">;</span></code><!----></pre> <p>Now we will loop through each ball and apply the physics:</p> <pre class="language-cpp"><!----><code class="language-cpp">
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> balls<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    ball_info <span class="token operator">&amp;</span>ball <span class="token operator">=</span> balls<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Gravity</span>
+    updated_balls<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>velocity<span class="token punctuation">.</span>y <span class="token operator">-=</span> earth_gravity <span class="token operator">*</span> delta_time<span class="token punctuation">;</span>
+
+    <span class="token comment">// Collision with ground</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ball<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">&lt;</span> ball<span class="token punctuation">.</span>radius<span class="token punctuation">)</span>
+    <span class="token punctuation">&#123;</span>
+        updated_balls<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>velocity<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span>ball<span class="token punctuation">.</span>velocity<span class="token punctuation">.</span>y <span class="token operator">*</span> loss_factor<span class="token punctuation">;</span>
+        updated_balls<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> ball<span class="token punctuation">.</span>radius<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// </span>
+    <span class="token comment">// Collisions with other balls</span>
+    <span class="token comment">//</span>
+<span class="token punctuation">&#125;</span>
+</code><!----></pre> <p>Now we calculate velocity changes from colliding with other balls:</p> <pre class="language-cpp"><!----><code class="language-cpp"><span class="token comment">// Now we loop through every other ball one we alread have</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> balls<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token comment">// Skip collision with self</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">==</span> j<span class="token punctuation">)</span>
+        <span class="token keyword">continue</span><span class="token punctuation">;</span>
+    
+    ball_info <span class="token operator">&amp;</span>other_ball <span class="token operator">=</span> balls<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Detect collision with other ball</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">length</span><span class="token punctuation">(</span>ball<span class="token punctuation">.</span>position <span class="token operator">-</span> other_ball<span class="token punctuation">.</span>position<span class="token punctuation">)</span> <span class="token operator">&lt;</span> ball<span class="token punctuation">.</span>radius <span class="token operator">+</span> other_ball<span class="token punctuation">.</span>radius<span class="token punctuation">)</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token comment">// Vector from ball center to other-ball center</span>
+        vec3 hit_dir <span class="token operator">=</span> <span class="token function">normalize</span><span class="token punctuation">(</span>other_ball<span class="token punctuation">.</span>position <span class="token operator">-</span> ball<span class="token punctuation">.</span>position<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// Change the other ball's velocity and divide by other_ball's mass</span>
+        <span class="token comment">// to respect Law of Conservation of Momentum</span>
+        updated_balls<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>velocity <span class="token operator">+=</span> hit_dir <span class="token operator">*</span> loss_factor <span class="token operator">/</span> other_ball<span class="token punctuation">.</span>mass <span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+</code><!----></pre> <p>And finally replaced balls with updated balls copy and apply velocities to actually change the balls positions:</p> <pre class="language-cpp"><!----><code class="language-cpp"><span class="token comment">// Update real balls with an updated array</span>
+balls <span class="token operator">=</span> updated_balls<span class="token punctuation">;</span>
+
+<span class="token comment">// Apply velocities</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> balls<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    balls<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>position <span class="token operator">+=</span> balls<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>velocity <span class="token operator">*</span> delta_time<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+</code><!----></pre><!----></article><!----><!----> <footer class="rounded-lg m-4"><div class="w-full max-w-screen-xl mx-auto p-4 md:py-8"><span class="block text-sm text-gray-500 text-center">© 2025 T. Sandsworth. All Rights Reserved.</span></div></footer><!----><!--]--> <!--[!--><!--]--><!--]-->
+			
+			<script>
+				{
+					__sveltekit_5mdkc3 = {
+						base: new URL("..", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("../_app/immutable/entry/start.DpZYY4rl.js"),
+						import("../_app/immutable/entry/app.B-Ie2uOe.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 4],
+							data: [null,null],
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
